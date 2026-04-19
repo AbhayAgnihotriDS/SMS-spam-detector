@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AI Spam Detector Pro</title>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+body {
+    margin: 0;
+    font-family: 'Segoe UI', sans-serif;
+    background: linear-gradient(135deg, #0f172a, #1e293b);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    color: white;
+}
+
+/* Container */
+.container {
+    width: 420px;
+    padding: 25px;
+    border-radius: 20px;
+    background: rgba(255,255,255,0.05);
+    backdrop-filter: blur(15px);
+    box-shadow: 0 0 30px rgba(0,0,0,0.5);
+    text-align: center;
+}
+
+/* Title */
+h2 {
+    margin-bottom: 15px;
+}
+
+/* Input */
+textarea {
+    width: 100%;
+    height: 100px;
+    border-radius: 10px;
+    border: none;
+    padding: 10px;
+    font-size: 14px;
+    outline: none;
+}
+
+/* Button */
+button {
+    margin-top: 15px;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 10px;
+    background: linear-gradient(45deg, #38bdf8, #6366f1);
+    color: white;
+    font-size: 16px;
+    cursor: pointer;
+    transition: 0.3s;
+}
+button:hover {
+    transform: scale(1.05);
+}
+
+/* Result */
+.result {
+    margin-top: 15px;
+    font-size: 20px;
+    font-weight: bold;
+}
+
+/* Confidence Bar */
+.bar {
+    height: 10px;
+    background: #334155;
+    border-radius: 10px;
+    margin-top: 10px;
+}
+.fill {
+    height: 100%;
+    width: 0%;
+    background: #22c55e;
+    border-radius: 10px;
+    transition: width 0.5s;
+}
+
+/* History */
+.history {
+    margin-top: 15px;
+    text-align: left;
+    font-size: 13px;
+    max-height: 120px;
+    overflow-y: auto;
+}
+.history div {
+    padding: 5px;
+    border-bottom: 1px solid #444;
+}
+
+/* Highlight */
+.highlight {
+    color: red;
+    font-weight: bold;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>📩 AI Spam Detector</h2>
+
+    <textarea id="text" placeholder="Type your message..."></textarea>
+    <br>
+    <button onclick="predict()">Analyze</button>
+
+    <div class="result" id="result"></div>
+
+    <!-- Confidence -->
+    <div class="bar">
+        <div class="fill" id="bar"></div>
+    </div>
+    <div id="confidenceText"></div>
+
+    <!-- Chart -->
+    <canvas id="chart" width="300" height="200"></canvas>
+
+    <!-- History -->
+    <div class="history" id="history"></div>
+</div>
+
+<script>
+let chart;
+let historyList = [];
+
+// Highlight spam words
+function highlight(text) {
+    let spamWords = ["free", "buy", "offer", "click", "win"];
+    spamWords.forEach(word => {
+        let regex = new RegExp(word, "gi");
+        text = text.replace(regex, `<span class="highlight">${word}</span>`);
+    });
+    return text;
+}
+
+// Update chart
+function updateChart(spam, notSpam) {
+    let ctx = document.getElementById("chart");
+
+    if (chart) chart.destroy();
+
+    chart = new Chart(ctx, {
+        type: "bar",
+        data: {
+            labels: ["Spam", "Not Spam"],
+            datasets: [{
+                label: "Probability %",
+                data: [spam, notSpam]
+            }]
+        }
+    });
+}
+
+// Add history
+function addHistory(text, result) {
+    historyList.unshift({text, result});
+    historyList = historyList.slice(0, 5);
+
+    let div = document.getElementById("history");
+    div.innerHTML = "";
+
+    historyList.forEach(item => {
+        let el = document.createElement("div");
+        el.innerHTML = highlight(item.text) + " → " + item.result;
+        div.appendChild(el);
+    });
+}
+
+// Main predict function
+async function predict() {
+    let text = document.getElementById("text").value;
+
+    if (!text) {
+        alert("Enter text!");
+        return;
+    }
+
+    document.getElementById("result").innerHTML = "Analyzing...";
+
+    try {
+        let res = await fetch("/predict", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ text: text })
+        });
+
+        let data = await res.json();
+
+        // Show result
+        document.getElementById("result").innerHTML = data.prediction;
+
+        // Confidence bar
+        let conf = data.confidence;
+        let bar = document.getElementById("bar");
+        bar.style.width = conf + "%";
+
+        if (conf > 80) bar.style.background = "#22c55e";
+        else if (conf > 50) bar.style.background = "#facc15";
+        else bar.style.background = "#ef4444";
+
+        document.getElementById("confidenceText").innerHTML =
+            "Confidence: " + conf + "%";
+
+        // Chart
+        updateChart(data.spam_prob || 50, data.not_spam_prob || 50);
+
+        // History
+        addHistory(text, data.prediction);
+
+    } catch (err) {
+        document.getElementById("result").innerHTML = "Server error ❌";
+    }
+}
+</script>
+
+</body>
+</html>
