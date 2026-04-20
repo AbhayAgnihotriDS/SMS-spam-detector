@@ -1,0 +1,106 @@
+# 📩 SMS Spam Detection System
+
+## 📌 Overview
+
+This project is a Machine Learning-based web application that classifies SMS messages as **Spam** or **Ham (Not Spam)**.
+It uses Natural Language Processing (NLP) techniques and a trained classification model to detect unwanted messages.
+
+---
+
+## 🎯 Features
+
+* Detect whether an SMS is Spam or Not Spam
+* Real-time prediction using a trained ML model
+* Text preprocessing using NLP techniques
+* Simple and user-friendly web interface
+
+---
+
+## 🛠️ Tech Stack
+
+* **Python**
+* **Flask**
+* **Scikit-learn**
+* **NLTK**
+* **HTML, CSS, JavaScript**
+
+---
+
+## 📂 Project Structure
+
+project/
+│── app.py
+│── model.pkl
+│── vectorizer.pkl
+│── templates/
+│── static/
+│── requirements.txt
+
+---
+
+## ⚙️ Installation
+
+1. Clone the repository:
+
+```bash
+git clone https://github.com/your-username/sms-spam-detection.git
+cd sms-spam-detection
+```
+
+2. Install dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+---
+
+## ▶️ Usage
+
+Run the application:
+
+```bash
+python app.py
+```
+
+Open your browser and go to:
+
+```
+https://sms-spam-detector-bbty.onrender.com/
+```
+
+---
+
+## 📊 Model Details
+
+* **Algorithm Used:** Multinomial Naive Bayes
+* **Text Processing:** Tokenization, Stopword Removal, Vectorization (TF-IDF)
+* **Accuracy:** ~95% (depends on dataset)
+
+---
+
+## 📸 Screenshots
+
+(Add screenshots of your web app here)
+
+---
+
+## 🌐 Deployment
+
+You can deploy this project using:
+
+* Render
+* Heroku
+* AWS
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to fork the repository and submit a pull request.
+
+---
+
+## 📜 License
+
+This project is licensed under the MIT License.
